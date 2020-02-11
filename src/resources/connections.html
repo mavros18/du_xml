@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+ul { margin-top: 0px; margin-bottom: 0px; padding-left: 20px; /*list-style-type:decimal-leading-zero;*/ }
+</style>
+<script src="connection_details.js"></script>
+<script>
+
+function myFunction(el) {
+
+    if (el.value.length > 3) {
+        el.setAttribute('list','du_tasks');
+    }
+    else {
+        el.setAttribute('list','empty');
+    }
+}
+
+function task_search() {
+
+	document.getElementById("res1").style.display = "none";
+	document.getElementById("res2").style.display = "none";
+	
+	var task = document.getElementById("in1").value;
+	var res_list_1 = [];
+	var res_list_2 = [];
+	var tmp;
+	var building_string = "";
+	
+	document.getElementById("head1").innerHTML = "Source " + task;
+	document.getElementById("head2").innerHTML = "Destination " + task;
+	document.getElementById("list1").innerHTML = "";
+	document.getElementById("list2").innerHTML = "";
+	
+	for (var i=0;i<du_connections.length;i++) {
+		if (du_connections[i].source == task) {
+			res_list_1.push(i);
+		}
+		if (du_connections[i].destination == task) {
+			res_list_2.push(i);
+		}
+	}
+	
+	
+	
+	while (res_list_1.length > 0) {
+		tmp = res_list_1.splice(0,1);
+		building_string = "";
+		
+		if (du_connections[tmp].destination == du_connections[tmp].source) {
+			building_string += "<font color=\"blue\">" + du_connections[tmp].destination + "</font><ul><li><font color=\"blue\">" + du_connections[tmp].description + "</font></li>";
+		}
+		else if (du_connections[tmp].exec_d == 0){
+			building_string += "<font color=\"red\">" + du_connections[tmp].destination + "</font><ul><li><font color=\"red\">" + du_connections[tmp].description + "</font></li>";
+		}
+		else {
+			building_string += du_connections[tmp].destination + "<ul><li>" + du_connections[tmp].description + "</li>";
+		}
+		
+		var i=0;
+		
+		while (i<res_list_1.length) {
+			if (du_connections[res_list_1[i]].destination == du_connections[tmp].destination) {
+				if (du_connections[res_list_1[i]].destination == du_connections[res_list_1[i]].source) {
+					building_string += "<li><font color=\"blue\">" + du_connections[res_list_1[i]].description + "</font></li>";
+				}
+				else if (du_connections[res_list_1[i]].exec_d == 0){
+					building_string += "<li><font color=\"red\">" + du_connections[res_list_1[i]].description + "</font></li>";
+				}
+				else {
+					building_string += "<li>" + du_connections[res_list_1[i]].description + "</li>";			
+				}
+
+				res_list_1.splice(i,1);
+			}
+			else {
+				i++;
+			}
+		}
+
+		document.getElementById("list1").innerHTML += building_string + "</ul><br>";
+	}
+	
+	
+	while (res_list_2.length > 0) {
+		tmp = res_list_2.splice(0,1);
+		building_string = "";
+		
+		if (du_connections[tmp].destination == du_connections[tmp].source) {
+			building_string += "<font color=\"blue\">" + du_connections[tmp].source + "</font><ul><li><font color=\"blue\">" + du_connections[tmp].description + "</font></li>";
+		}
+		else if (du_connections[tmp].exec_s == 0) {
+			building_string += "<font color=\"red\">" + du_connections[tmp].source + "</font><ul><li><font color=\"red\">" + du_connections[tmp].description + "</font></li>";
+		}
+		else {
+			building_string += du_connections[tmp].source + "<ul><li>" + du_connections[tmp].description + "</li>";
+		}
+		
+		var i=0;
+		
+		while (i<res_list_2.length) {
+			if (du_connections[res_list_2[i]].source == du_connections[tmp].source) {
+				if (du_connections[res_list_2[i]].destination == du_connections[res_list_2[i]].source) {
+					building_string += "<li><font color=\"blue\">" + du_connections[res_list_2[i]].description + "</font></li>";
+				}
+				else if (du_connections[res_list_2[i]].exec_s == 0) {
+					building_string += "<li><font color=\"red\">" + du_connections[res_list_2[i]].description + "</font></li>";
+				}
+				else {
+					building_string += "<li>" + du_connections[res_list_2[i]].description + "</li>";
+				}
+				res_list_2.splice(i,1);
+			}
+			else {
+				i++;
+			}
+		}
+
+		document.getElementById("list2").innerHTML += building_string + "</ul><br>";
+	}
+	
+	document.getElementById("res1").style.display = "block";
+	document.getElementById("res2").style.display = "block";
+
+}
+
+function connection_search() {
+
+	document.getElementById("res1").style.display = "none";
+	document.getElementById("res2").style.display = "none";
+	
+	var task1 = document.getElementById("in2").value;
+	var task2 = document.getElementById("in3").value;
+	
+	var list1 = "";
+	var list2 = "";
+	
+	document.getElementById("head1").innerHTML = "Source " + task1;
+	document.getElementById("head2").innerHTML = "Source " + task2;
+	document.getElementById("list1").innerHTML = "";
+	document.getElementById("list2").innerHTML = "";
+	
+	for (var i=0;i<du_connections.length;i++) {
+		if ((du_connections[i].source == task1) && (du_connections[i].destination == task2) ) {
+			list1 += "<li>" + du_connections[i].description + "</li>";
+		}
+		if ((du_connections[i].source == task2) && (du_connections[i].destination == task1) ) {
+			list2 += "<li>" + du_connections[i].description + "</li>";
+		}
+	}
+	
+	document.getElementById("list1").innerHTML = "<ul>" + list1 + "</ul>";
+	document.getElementById("list2").innerHTML = "<ul>" + list2 + "</ul>";
+	
+	document.getElementById("res1").style.display = "block";
+	document.getElementById("res2").style.display = "block";
+
+}
+
+function my_init() {
+
+	var uniq_tasks = [];
+	var building_string = "";
+
+	for (var i=0;i<du_connections.length;i++) {
+		if (uniq_tasks.indexOf(du_connections[i].source) < 0) {
+			uniq_tasks.push(du_connections[i].source);
+			building_string += "<option value=\""+du_connections[i].source+"\">";
+		}
+		if (uniq_tasks.indexOf(du_connections[i].destination) < 0) {
+			uniq_tasks.push(du_connections[i].destination);
+			building_string += "<option value=\""+du_connections[i].destination+"\">";
+		}
+	}
+	
+	document.getElementById("du_tasks").innerHTML += building_string;
+	
+	var r = confirm("Calculate tasks?");
+	if (r == true) {
+		//txt = "You pressed OK!";
+		var cnt = 0;
+		var flag = false;
+	
+		for (var i=0;i<uniq_tasks.length;i++) {
+			flag = false;
+			for (var j=0;j<du_connections.length;j++) {
+				if (du_connections[j].source != du_connections[j].destination) {
+					if ((uniq_tasks[i] == du_connections[j].destination) || (uniq_tasks[i] == du_connections[j].source)) {
+						flag = true;
+					}
+				}
+			}
+			
+			if (!flag) {
+				cnt++;
+			}
+		}
+		
+		
+		var u_tasks = [];
+	
+		for (var i=0;i<du_connections.length;i++) {
+			if (u_tasks.indexOf(du_connections[i].source) < 0) {
+				u_tasks.push(du_connections[i].source);
+			}
+		}
+		
+		alert("uniq_tasks : "+ uniq_tasks.length+"\nself_tasks : "+ cnt+"\nTrue_tasks : "+(uniq_tasks.length-cnt));//+"\n\nsrc_tasks : "+u_tasks.length+" (cross-check with out.txt)");
+	} else {
+		//txt = "You pressed Cancel!";
+	}
+}
+
+</script>
+<title>DU tasks</title>
+</head>
+<body onload="my_init()">
+	<br>
+	<div>
+		Search for: <input id="in1" type="text" list="empty" oninput="myFunction(this)">
+		<button type="button" onclick="task_search()">Search</button>
+	</div>
+	<br>
+	<div>
+		Task1: <input id="in2" type="text" list="empty" oninput="myFunction(this)">
+		Task2: <input id="in3" type="text" list="empty" oninput="myFunction(this)">
+		<button type="button" onclick="connection_search()">Search</button>
+	</div>
+	<br>
+	<div style="border:1px solid;height:80%;overflow:auto;padding:5px;">
+		<div id="res1" style="display:none;float:left;width:48%;">
+			<b><span id="head1" ></span></b><br><br>
+			<div id="list1" ></div>
+		</div>
+		<div id="res2" style="display:none;float:left;padding-left:4%;width:48%;">
+			<b><span id="head2" ></span></b><br><br>
+			<div id="list2" ></div>
+		</div>
+	</div>	
+	<datalist id="du_tasks">
+	</datalist>
+        <datalist id="empty">
+	</datalist>
+</body>
+</html>
